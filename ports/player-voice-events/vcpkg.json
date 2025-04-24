@@ -1,6 +1,12 @@
 {
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
   "name": "player-voice-events",
-  "version-string": "0.8",
+  "version-semver": "0.8.0",
+  "port-version": 0,
+  "description": "",
+  "homepage": "https://github.com/lunatic-gh/Player-Voice-Events",
+  "license": "MIT",
+  "supports": "windows & x64",
   "dependencies": [
     "commonlibsse-ng",
     "yaml-cpp"
