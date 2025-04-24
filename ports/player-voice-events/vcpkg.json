@@ -1,0 +1,8 @@
+{
+  "name": "player-voice-events",
+  "version-string": "0.8",
+  "dependencies": [
+    "commonlibsse-ng",
+    "yaml-cpp"
+  ]
+}

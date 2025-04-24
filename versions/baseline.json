@@ -1,0 +1,8 @@
+{
+  "default": {
+    "player-voice-events": {
+      "baseline": "0.8",
+      "port-version": 0
+    }
+  }
+}
