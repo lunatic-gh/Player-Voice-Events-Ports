@@ -86,12 +86,6 @@ for port in ports_folder.iterdir():
         print(f"- Latest commit {latest_commit}")
         print(f"- Latest sha512 = {latest_sha512}")
 
-        vcpkg_json = json.loads(vcpkg_json_path.read_text())
-        version = version_parser.Version(vcpkg_json['version'])
-        version._build_version += 1
-        print(str(version))
-        exit();
-
         # Update portfile.cmake
         portfile_str = portfile_str.replace(github_sha, latest_sha512)
         portfile_str = portfile_str.replace(github_ref, latest_commit)
