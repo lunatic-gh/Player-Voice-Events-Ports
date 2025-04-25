@@ -105,7 +105,7 @@ for port in ports_folder.iterdir():
             "./versions/" + port.name[0] + "-/" + port.name + ".json")
         port_version_json = json.loads(port_version_path.read_text())
         port_version_json['versions'].append(
-            {"version-string": str(version), "git-tree": git_tree_object_id})
+            {"version": str(version), "git-tree": git_tree_object_id, "port-version": 0})
         port_version_path.write_text(json.dumps(port_version_json))
 
         # Update Baseline
