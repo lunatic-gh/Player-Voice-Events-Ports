@@ -1,11 +1,16 @@
-import requests
-import pathlib
-import re
+import argparse
 import hashlib
 import json
-import version_parser
+import pathlib
+import re
+
 import git
-import argparse 
+import requests
+import version_parser
+
+
+# Shamelessly stolen from https://github.com/reitowo/vcpkg-registry & modified to make it work again.
+# Joke, thanks <3
 
 def parse_vcpkg_from_github(portfile):
     begin = portfile.find("vcpkg_from_github(")
@@ -34,20 +39,20 @@ def parse_vcpkg_from_github(portfile):
 
 
 def github_get_latest_commit(repo, head):
-    r = requests.get(f"https://api.github.com/repos/{repo}/commits/{head}", proxies={
-                     'http': 'http://127.0.0.1:10809', 'https': 'http://127.0.0.1:10809'})
+    r = requests.get("https://api.github.com/repos/lunatic-gh/Player-Voice-Events/commits/rewrite")
     j = r.json()
     return j['sha']
 
 
 def github_get_archive(repo, commit):
-    r = requests.get(f"https://github.com/{repo}/archive/{commit}.tar.gz", proxies={
-                     'http': 'http://127.0.0.1:10809', 'https': 'http://127.0.0.1:10809'})
+    r = requests.get(f"https://github.com/{repo}/archive/{commit}.tar.gz")
     return hashlib.sha512(r.content).hexdigest()
 
+
 parser = argparse.ArgumentParser(description='Auto update vcpkg private registry repo')
-parser.add_argument('-f', action='store_true', help="Force update all files, even the local portfile.cmake already up-to-date.") 
-args = parser.parse_args() 
+parser.add_argument('-f', action='store_true',
+                    help="Force update all files, even the local portfile.cmake already up-to-date.")
+args = parser.parse_args()
 
 force_update = args.f
 
@@ -81,6 +86,12 @@ for port in ports_folder.iterdir():
         print(f"- Latest commit {latest_commit}")
         print(f"- Latest sha512 = {latest_sha512}")
 
+        vcpkg_json = json.loads(vcpkg_json_path.read_text())
+        version = version_parser.Version(vcpkg_json['version'])
+        version._build_version += 1
+        print(str(version))
+        exit();
+
         # Update portfile.cmake
         portfile_str = portfile_str.replace(github_sha, latest_sha512)
         portfile_str = portfile_str.replace(github_ref, latest_commit)
@@ -92,14 +103,6 @@ for port in ports_folder.iterdir():
         version._build_version += 1
         vcpkg_json['version'] = str(version)
         vcpkg_json_path.write_text(json.dumps(vcpkg_json))
-
-        # Update Git
-        try:
-            git_repo.git.add(port.absolute()) 
-            git_repo.git.commit(m="Update " + port.name)
-            git_repo.remote().push()
-        except:
-            pass
         git_tree_object_id = str(git_repo.rev_parse("HEAD:ports/" + port.name))
         print(f"- Latest git-tree = {git_tree_object_id}")
 
@@ -116,13 +119,3 @@ for port in ports_folder.iterdir():
         baseline_json = json.loads(baseline_path.read_text())
         baseline_json['default'][port.name]['baseline'] = str(version)
         baseline_path.write_text(json.dumps(baseline_json))
-
-
-# Update Git Root
-try:
-    git_repo.git.add(".") 
-    git_repo.git.commit(m="Update Root")
-    git_repo.remote().push()
-except:
-    pass
-print("Complete")
